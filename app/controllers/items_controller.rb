@@ -1,7 +1,7 @@
 class ItemsController < ApplicationController
-  before_action :set_item, only: [:show, :edit, :update, :destroy, :borrow]
-  before_action :set_user, only: [:borrow]
-  before_action :check_amout, only: :borrow
+  before_action :set_item, only: [:show, :edit, :update, :destroy, :borrow, :return]
+  before_action :set_user, only: [:borrow, :return]
+  before_action :check_amout, only: [:borrow]
 
   # GET /items
   # GET /items.json
@@ -66,6 +66,11 @@ class ItemsController < ApplicationController
   def borrow
     @user.borrow(@item, params[:amount])
     render json: {message: "Item successfully borrowed"}, status: :ok
+  end
+
+  def return
+    @user.return(@item, params[:amount])
+    render json: {message: "Item successfully returned"}, status: :ok
   end
 
   private

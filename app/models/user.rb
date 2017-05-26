@@ -8,4 +8,11 @@ class User < ApplicationRecord
       copy.update_attribute(:status, :borrowed)
     end
   end
+
+  def return(item, amount)
+    item_copies.where(item_id: item.id).limit(amount).each do |copy|
+      copy.update_attribute(:status, :available)
+      borrowed_copies.find_by(item_copy_id: copy.id).destroy
+    end
+  end
 end
