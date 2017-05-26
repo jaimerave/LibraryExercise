@@ -1,5 +1,7 @@
 class ItemsController < ApplicationController
-  before_action :set_item, only: [:show, :edit, :update, :destroy]
+  before_action :set_item, only: [:show, :edit, :update, :destroy, :borrow]
+  before_action :set_user, only: [:borrow]
+  before_action :check_amout, only: :borrow
 
   # GET /items
   # GET /items.json
@@ -61,14 +63,30 @@ class ItemsController < ApplicationController
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_item
-      @item = Item.find(params[:id])
-    end
+  def borrow
+    @user.borrow(@item, params[:amount])
+    render json: {message: "Item successfully borrowed"}, status: :ok
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def item_params
-      params.require(:item).permit(:title, :length, :copies, :item_type)
-    end
+  private
+
+  # Use callbacks to share common setup or constraints between actions.
+  def set_item
+    @item = Item.find(params[:id])
+  end
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def item_params
+    params.require(:item).permit(:title, :length, :copies, :item_type)
+  end
+
+  def set_user
+    @user = User.find_by(username: params[:username])
+    render json: {error: "Invalid User"}, status: :unprocessable_entity if @user.nil?
+  end
+
+  def check_amout
+    return true if @item.available_copies.count > params[:amount].to_i
+    render json: {error: "Not enough copies available"}, status: :unprocessable_entity
+  end
 end
